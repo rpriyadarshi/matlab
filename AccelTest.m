@@ -7,7 +7,7 @@ ADISession = daq.createSession('adi');
 addAnalogInputChannel(ADISession,'smu1','a','Voltage');
 addAnalogInputChannel(ADISession,'smu1','b','Voltage');
 
-v = 0:1:100;
+v = 0:1:1000;
 
 for i=1:length(v)
     accl = inputSingleScan(ADISession);

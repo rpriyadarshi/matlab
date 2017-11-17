@@ -32,13 +32,6 @@ x3 = startForeground(s);
 
 X = [x1'; x2'; x3'];
 
-figure(1);
-for i = 1:3
-    subplot(3,1,i)
-    plot(t(1:100),X(i,1:100))
-    title(['Row ',num2str(i),' in the Time Domain'])
-end
-
 n = 2^nextpow2(L);
 
 dim = 2;
@@ -49,11 +42,18 @@ P2 = abs(Y/n);
 P1 = P2(:,1:n/2+1);
 P1(:,2:end-1) = 2*P1(:,2:end-1);
 
+figure(1);
+for i = 1:3
+    subplot(3,1,i)
+    plot(t(1:100),X(i,1:100))
+    title(['Row ',num2str(i),' in the Time Domain (Acquired)'])
+end
+
 figure(2);
 for i=1:3
     subplot(3,1,i)
     plot(0:(Fs/n):(Fs/2-Fs/n),P1(i,1:n/2))
-    title(['Row ',num2str(i), ' in the Frequency Domain'])
+    title(['Row ',num2str(i), ' in the Frequency Domain (Acquired)'])
 end
 
 clear s;

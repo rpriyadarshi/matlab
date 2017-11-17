@@ -1,31 +1,46 @@
 clear;
 clc;
 
+% ADALM1000
 d = daq.getDevices;
 s = daq.createSession('adi');
 
 addAnalogOutputChannel(s,'smu1','a','Voltage');
 addAnalogInputChannel(s,'smu1','b','Voltage');
 
-k = 5;                  % Number of waves
-fy = 1;             	% Signal frequency in Hz
-wy = 2 * pi * fy;       % Signal frequency in radians/sec
-fs = 60;                % Sampling frequency in Hz
-tiv = 1 / fs;           % Time interval between samples
-t = 0:tiv:(fy*k);       % Time interval set
-y = sin(wy * t);        % Signal data set
-y = y + 1;              % Shift for positive voltage output
+% Waveform setup
+Fs = 1000;                    % Sampling frequency
+T = 1/Fs;                     % Sampling period
+L = 1000;                     % Length of signal
+t = (0:L-1)*T;                % Time vector
 
-v = zeros(length(t), 1);
+v1 = cos(2*pi*50*t);          % First row wave
+v2 = cos(2*pi*150*t);         % Second row wave
+v3 = cos(2*pi*300*t);         % Third row wave
+v4 = v1 + v2 + v3;
 
-for i=1:length(t)
-    outputSingleScan(s, y(i));
-    v(i) = inputSingleScan(s);
-end
+% Shift the values to positive.
+V = v4 - min(v4);
 
-plot(t, y);
-hold on;
-plot(t, v);
+queueOutputData(s, V');
+X = startForeground(s)'; 
+
+n = 2^nextpow2(L);
+
+dim = 2;
+
+Y = fft(X, n, dim);
+
+P2 = abs(Y/n);
+P1 = P2(:,1:n/2+1);
+P1(:,2:end-1) = 2*P1(:,2:end-1);
+
+subplot(2,1,1)
+plot(t(1:100),X(1,1:100))
+title(['Row ',num2str(1),' in the Time Domain (Acquired)'])
+
+subplot(2,1,2)
+plot(0:(Fs/n):(Fs/2-Fs/n),P1(1,1:n/2))
+title(['Row ',num2str(1), ' in the Frequency Domain (Acquired)'])
 
 clear s;
-

@@ -8,23 +8,18 @@ L = 1000;                       % Length of signal
 t = (0:L-1)*T;                  % Time vector
 n = 2^nextpow2(L);
 dim = 2;
-delay = 0.5;                    % make sure sample faster than resolution 
+delay = 1;                    % make sure sample faster than resolution 
+r = 10;
 
 [f1, f2] = InitDisplay();
-s = InitDAC();
+[s, d] = InitDAC();
 
-for i=1:10
-    V = CreateWaveform(t);
-    X = Acquire(s, V);
-    P1 = CalcFFT(n, dim, X);
-    UpdateDisplay(f1, f2, Fs, t, n, X, P1);
-    pause(delay);
-end
+Acquire(f1, f2, Fs, t, n, dim, s, r, delay);
 
 clear s;
 
 % ADALM1000
-function s = InitDAC()
+function [s, d] = InitDAC()
     d = daq.getDevices;
     s = daq.createSession('adi');
 
@@ -47,7 +42,7 @@ function w = CreateWaveform(t)
     w = w4 - min(w4);
 end
 
-function X = Acquire(s, V)
+function X = DAC(s, V)
     queueOutputData(s, V');
     X = startForeground(s)'; 
 end
@@ -73,4 +68,14 @@ end
 function UpdateDisplay(f1, f2, Fs, t, n, X, P1)
     set(f1, 'XData', t(1:100), 'YData', X(1,1:100));
     set(f2, 'XData', 0:(Fs/n):(Fs/2-Fs/n), 'YData', P1(1,1:n/2));
+end
+
+function Acquire(f1, f2, Fs, t, n, dim, s, r, delay)
+    for i=1:r
+        V = CreateWaveform(t);
+        X = DAC(s, V);
+        P1 = CalcFFT(n, dim, X);
+        UpdateDisplay(f1, f2, Fs, t, n, X, P1);
+        pause(delay);
+    end
 end

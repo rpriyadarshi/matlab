@@ -9,11 +9,12 @@ t = (0:L-1)*T;                % Time vector
 n = 2^nextpow2(L);
 dim = 2;
 
+[f1, f2] = InitDisplay();
 s = InitDAC();
 V = CreateWaveform(t);
 X = Acquire(s, V);
 P1 = CalcFFT(n, dim, X);
-Display(Fs, t, n, X, P1);
+UpdateDisplay(f1, f2, Fs, t, n, X, P1);
 
 clear s;
 
@@ -54,12 +55,17 @@ function P1 = CalcFFT(n, dim, X)
     P1(:,2:end-1) = 2*P1(:,2:end-1);
 end
 
-function Display(Fs, t, n, X, P1)
-    subplot(2,1,1)
-    plot(t(1:100), X(1,1:100))
-    title(['Row ',num2str(1),' in the Time Domain (Acquired)'])
+function [f1, f2] = InitDisplay()
+    subplot(2,1,1);
+    f1 = plot(0, 0);
+    title(['Row ',num2str(1),' in the Time Domain (Acquired)']);
 
-    subplot(2,1,2)
-    plot(0:(Fs/n):(Fs/2-Fs/n), P1(1,1:n/2))
-    title(['Row ',num2str(1), ' in the Frequency Domain (Acquired)'])
+    subplot(2,1,2);
+    f2 = plot(0, 0);
+    title(['Row ',num2str(1), ' in the Frequency Domain (Acquired)']);
+end
+
+function UpdateDisplay(f1, f2, Fs, t, n, X, P1)
+    set(f1, 'XData', t(1:100), 'YData', X(1,1:100));
+    set(f2, 'XData', 0:(Fs/n):(Fs/2-Fs/n), 'YData', P1(1,1:n/2));
 end

@@ -2,19 +2,24 @@ clear;
 clc;
 
 % Setup variables
-Fs = 1000;                    % Sampling frequency
-T = 1/Fs;                     % Sampling period
-L = 1000;                     % Length of signal
-t = (0:L-1)*T;                % Time vector
+Fs = 1000;                      % Sampling frequency
+T = 1/Fs;                       % Sampling period
+L = 1000;                       % Length of signal
+t = (0:L-1)*T;                  % Time vector
 n = 2^nextpow2(L);
 dim = 2;
+delay = 0.5;                    % make sure sample faster than resolution 
 
 [f1, f2] = InitDisplay();
 s = InitDAC();
-V = CreateWaveform(t);
-X = Acquire(s, V);
-P1 = CalcFFT(n, dim, X);
-UpdateDisplay(f1, f2, Fs, t, n, X, P1);
+
+for i=1:10
+    V = CreateWaveform(t);
+    X = Acquire(s, V);
+    P1 = CalcFFT(n, dim, X);
+    UpdateDisplay(f1, f2, Fs, t, n, X, P1);
+    pause(delay);
+end
 
 clear s;
 
